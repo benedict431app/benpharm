@@ -1,5 +1,8 @@
 # app.py
+<<<<<<< HEAD
 # app.py
+=======
+>>>>>>> 7241f060ad963e0b034f5b796e6a780a12f6dafe
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -13,18 +16,29 @@ from PIL import Image
 import io
 import base64
 
+<<<<<<< HEAD
 # Determine environment
 env = os.environ.get('FLASK_ENV', 'development')
 
 app = Flask(__name__)
 app.config.from_object(config[env])  # Use the config dictionary
+=======
+# Create upload folder if it doesn't exist
+def create_upload_folder():
+    upload_folder = Config.UPLOAD_FOLDER
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
 
-# Force PostgreSQL URL format for Render
-if os.environ.get('RENDER'):
-    database_url = app.config['SQLALCHEMY_DATABASE_URI']
-    if database_url and database_url.startswith('postgres://'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace('postgres://', 'postgresql://', 1)
+create_upload_folder()
 
+app = Flask(__name__)
+>>>>>>> 7241f060ad963e0b034f5b796e6a780a12f6dafe
+
+# Determine environment
+env = os.environ.get('FLASK_ENV', 'development')
+app.config.from_object(Config.config[env])
+
+# Initialize database
 db.init_app(app)
 
 # Initialize login manager
@@ -184,8 +198,6 @@ def detect_disease():
                     plant_image=filename,
                     plant_description=description,
                     treatment_recommendation=analysis,
-                    latitude=current_user.latitude,
-                    longitude=current_user.longitude,
                     location=current_user.location
                 )
                 db.session.add(report)
@@ -644,10 +656,40 @@ def format_datetime(value):
         return ""
     return value.strftime('%Y-%m-%d %H:%M')
 
+# Database health check endpoint
+@app.route('/health')
+def health_check():
+    try:
+        # Test database connection
+        db.session.execute('SELECT 1')
+        return jsonify({
+            'status': 'healthy',
+            'database': 'connected',
+            'timestamp': datetime.utcnow().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'database': 'disconnected',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500
+
+# Initialize database on startup
+def initialize_database():
+    with app.app_context():
+        try:
+            db.create_all()
+            print("✅ Database tables created successfully")
+        except Exception as e:
+            print(f"❌ Error creating database tables: {e}")
+
 if __name__ == '__main__':
+    initialize_database()
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     app.run(host='0.0.0.0', port=port, debug=debug)
+<<<<<<< HEAD
     @app.route('/test')
 def test():
     return jsonify({
@@ -656,3 +698,5 @@ def test():
         'database_url': str(app.config['SQLALCHEMY_DATABASE_URI'])[:50] + '...' if app.config['SQLALCHEMY_DATABASE_URI'] else 'Not set',
         'debug': app.config['DEBUG']
     })
+=======
+>>>>>>> 7241f060ad963e0b034f5b796e6a780a12f6dafe
