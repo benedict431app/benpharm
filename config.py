@@ -1,3 +1,4 @@
+# config.py
 import os
 from dotenv import load_dotenv
 
@@ -8,15 +9,19 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', os.getenv('SESSION_SECRET', 'dev-secret-key-change-in-production'))
     
     # Database - Use PostgreSQL on Render, SQLite locally
-    if os.environ.get('RENDER'):
-        DATABASE_URL = os.environ.get('DATABASE_URL')
-        if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-            DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    else:
-        DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+    DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+    
+    # Fix for Render's PostgreSQL URL format
+    if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 10,
+        'pool_recycle': 300,
+        'pool_pre_ping': True,
+    }
     
     # File uploads
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
@@ -28,13 +33,26 @@ class Config:
         os.makedirs(UPLOAD_FOLDER)
     
     # API Keys
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-    PERENUAL_API_KEY = os.getenv('PERENUAL_API_KEY')
-    OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
-    PLANTID_API_KEY = os.getenv('PLANTID_API_KEY')
-    WEGLOT_API_KEY = os.getenv('WEGLOT_API_KEY')
-    COHERE_API_KEY = os.getenv('COHERE_API_KEY')
+    COHERE_API_KEY = os.getenv('COHERE_API_KEY', '')
+    OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '')
     
     # Flask configuration
     PREFERRED_URL_SCHEME = 'https' if os.environ.get('RENDER') else 'http'
+    
+    # Additional settings
+    DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+
+# For development
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+# For production
+class ProductionConfig(Config):
+    DEBUG = False
+
+# Configuration dictionary
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}

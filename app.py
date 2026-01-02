@@ -1,18 +1,23 @@
+# app.py
+# app.py
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import requests
-from config import Config
+from config import config  # Import the config dictionary
 from models import db, User, InventoryItem, Customer, Sale, SaleItem, Communication, DiseaseReport, Notification, WeatherData
 import google.generativeai as genai
 from PIL import Image
 import io
 import base64
 
+# Determine environment
+env = os.environ.get('FLASK_ENV', 'development')
+
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(config[env])  # Use the config dictionary
 
 # Force PostgreSQL URL format for Render
 if os.environ.get('RENDER'):
@@ -41,6 +46,11 @@ def allowed_file(filename):
 with app.app_context():
     db.create_all()
 
+# Rest of your app.py remains the same from line 41 onwards...
+# (All your routes and functions stay exactly as they are)
+
+# Rest of your app.py remains the same from line 41 onwards...
+# (All your routes and functions stay exactly as they are)
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -638,3 +648,11 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     app.run(host='0.0.0.0', port=port, debug=debug)
+    @app.route('/test')
+def test():
+    return jsonify({
+        'status': 'OK',
+        'environment': env,
+        'database_url': str(app.config['SQLALCHEMY_DATABASE_URI'])[:50] + '...' if app.config['SQLALCHEMY_DATABASE_URI'] else 'Not set',
+        'debug': app.config['DEBUG']
+    })
