@@ -1,8 +1,4 @@
 # app.py
-<<<<<<< HEAD
-# app.py
-=======
->>>>>>> 7241f060ad963e0b034f5b796e6a780a12f6dafe
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -11,32 +7,20 @@ from datetime import datetime, timedelta
 import requests
 from config import config  # Import the config dictionary
 from models import db, User, InventoryItem, Customer, Sale, SaleItem, Communication, DiseaseReport, Notification, WeatherData
-import google.generativeai as genai
-from PIL import Image
-import io
-import base64
 
-<<<<<<< HEAD
 # Determine environment
 env = os.environ.get('FLASK_ENV', 'development')
 
 app = Flask(__name__)
 app.config.from_object(config[env])  # Use the config dictionary
-=======
+
 # Create upload folder if it doesn't exist
 def create_upload_folder():
-    upload_folder = Config.UPLOAD_FOLDER
+    upload_folder = app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
 
 create_upload_folder()
-
-app = Flask(__name__)
->>>>>>> 7241f060ad963e0b034f5b796e6a780a12f6dafe
-
-# Determine environment
-env = os.environ.get('FLASK_ENV', 'development')
-app.config.from_object(Config.config[env])
 
 # Initialize database
 db.init_app(app)
@@ -60,11 +44,6 @@ def allowed_file(filename):
 with app.app_context():
     db.create_all()
 
-# Rest of your app.py remains the same from line 41 onwards...
-# (All your routes and functions stay exactly as they are)
-
-# Rest of your app.py remains the same from line 41 onwards...
-# (All your routes and functions stay exactly as they are)
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -684,13 +663,7 @@ def initialize_database():
         except Exception as e:
             print(f"❌ Error creating database tables: {e}")
 
-if __name__ == '__main__':
-    initialize_database()
-    port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-    app.run(host='0.0.0.0', port=port, debug=debug)
-<<<<<<< HEAD
-    @app.route('/test')
+@app.route('/test')
 def test():
     return jsonify({
         'status': 'OK',
@@ -698,5 +671,9 @@ def test():
         'database_url': str(app.config['SQLALCHEMY_DATABASE_URI'])[:50] + '...' if app.config['SQLALCHEMY_DATABASE_URI'] else 'Not set',
         'debug': app.config['DEBUG']
     })
-=======
->>>>>>> 7241f060ad963e0b034f5b796e6a780a12f6dafe
+
+if __name__ == '__main__':
+    initialize_database()
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=debug)
